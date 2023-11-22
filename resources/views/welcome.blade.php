@@ -23,12 +23,14 @@
                 <label for="question_from_user">Questions</label>
             </div>
             <div class="mx-4 my-4 d-flex justify-content-center">
-                <button type="button" class="btn btn-primary" onclick="getApiResponse(this)">Submit Your Questions
+                <button type="button" class="btn btn-primary" onclick="getApiResponse()">Submit Your Questions
                 </button>
             </div>
 
             <div class="jumbotron bg-light">
-                <h2 class="text-center">Response</h2>
+                <div class="form-floating">
+                    <p class="text-center" id="question_box"></p>
+                </div>
                 <div>
                     <p class="text-justify p-4" id="response-answer"></p>
                 </div>
@@ -41,26 +43,24 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script>
-        function getApiResponse(element) {
+        const result = document.getElementById("response-answer");
 
-            $('#response-answer').text('');
-            var question = $('#question_from_user').val();
-
-            $.ajax({
-                type: "GET",
-                url: "{{ route('chatbot') }}",
-                data: {
-                    'question': question
-                },
-                dataType: "json",
-                success: function(response) {
-                    console.log('success');
-                    $('#response-answer').text(response.message);
-
-                },
-                error: function(error) {
-                    console.log('error');
+        function getApiResponse() {
+            const question = document.getElementById("question_from_user");
+            if (question.value === "") return;
+            const question_box = document.getElementById("question_box");
+            question_box.innerText = question.value;
+            result.innerText = "";
+            
+            const queryQuestion = encodeURIComponent(question.value);
+            question.value = "";
+            const source = new EventSource("/chatbot?question=" + queryQuestion);
+            source.addEventListener("update", function(event) {
+                if (event.data === "<end>") {
+                    source.close();
+                    return;
                 }
+                result.innerText += event.data;
             });
         }
     </script>
