@@ -20,7 +20,7 @@ class ChatBotController extends Controller
                 "messages" => [
                     ["role" => "user", "content" => "$question"]
                 ],
-                'max_tokens' => 1024,
+                'max_tokens' => 500,
             ]);
 
             foreach ($stream as $response) {
